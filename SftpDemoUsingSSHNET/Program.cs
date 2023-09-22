@@ -6,7 +6,7 @@ namespace SftpDemoUsingSSHNET
     {
         static void Main(string[] args)
         {
-            using(SftpClient client = new SftpClient(new PasswordConnectionInfo("host/ip", "username", "password")))
+            using(SftpClient client = new SftpClient(new PasswordConnectionInfo("192.168.1.9", "alam", "password")))
             {
                 client.Connect();
 
@@ -35,14 +35,18 @@ namespace SftpDemoUsingSSHNET
                 //client.DeleteFile(serverFile);
 
                 // List
-                string serverDirectory = $"\\TestSftp";
+                string serverDirectory = $"\\TestSftp\\MTR-Livin\\";
+                string localFile = $"C:\\mydata\\SppkSharedFolder\\MTR-Livin\\";
                 var files = client.ListDirectory(serverDirectory).ToList();
                 if (files.Any())
                 {
-                    foreach (var file in files)
+                    foreach (var serverFile in files)
                     {
-                        Console.WriteLine(file.Name);
-                        Console.WriteLine(file.FullName);
+                        using (Stream stream = File.OpenWrite($"{localFile}{serverFile.Name}"))
+                        {
+                            client.DownloadFile(serverFile.FullName, stream);
+                            client.DeleteFile(serverFile.FullName);
+                        }
                     }
                 }
 
